@@ -21,14 +21,14 @@ To install this module, clone the code and run the following commands:
 
 Alternatively, you can download a [release](/releases) and run:
 
-        cpanm Ntthal-XS-#.#.#.tar.gz
+	cpanm Ntthal-XS-#.#.#.tar.gz
 
 Here, the # signs are placeholders for the version number.
 
-The package will also install a demo/driver script named **ntthal_xs.pl**, 
-which should be executable after isntallation. The purpose is to test 
-the functionality and serve as a template for own code.
-
+The package will also install a demo/driver script named 
+[ntthal_xs.pl](/bin/ntthal_xs.pl), which should be executable 
+after isntallation. The purpose is to test the functionality 
+and serve as a template for own code.
 
 ## SYNOPSIS
 
