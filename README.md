@@ -79,16 +79,14 @@ and the **xs** version implemented here. *Note:* The underlying algorithm was __
 overhead calling it from Perl was reduced.
 
 ```
-Benchmark: running ntthal, ntthal_new, xs for at least 3 CPU seconds...
-
-     ntthal: 23 wallclock secs ( 0.46 usr  2.57 sys + 14.47 cusr  5.04 csys = 22.54 CPU) @ 106.70/s (n=2405)
- ntthal_new: 18 wallclock secs ( 0.34 usr  2.84 sys +  8.99 cusr  2.31 csys = 14.48 CPU) @ 389.36/s (n=5638)
-         xs:  3 wallclock secs ( 3.13 usr +  0.00 sys =  3.13 CPU) @ 1490.42/s (n=4665)
-
+Benchmark: timing 5000 iterations of ntthal, ntthal_new, xs...
+    ntthal: 16 wallclock secs ( 0.18 usr  1.82 sys +  7.84 cusr  7.28 csys = 17.12 CPU) @ 292.06/s (n=5000)
+ntthal_new: 10 wallclock secs ( 0.16 usr  1.22 sys +  5.09 cusr  3.38 csys =  9.85 CPU) @ 507.61/s (n=5000)
+        xs:  2 wallclock secs ( 2.37 usr +  0.00 sys =  2.37 CPU) @ 2109.70/s (n=5000)
              Rate     ntthal ntthal_new         xs
- ntthal      107/s         --       -73%       -93%
- ntthal_new  389/s       265%         --       -74%
- xs         1490/s      1297%       283%         --
+ntthal      292/s         --       -42%       -86%
+ntthal_new  508/s        74%         --       -76%
+xs         2110/s       622%       316%         --
 ```
 That is about a 4-fold improvement on my system.
 
