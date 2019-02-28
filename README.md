@@ -92,6 +92,6 @@ That is about a 4-fold improvement on my system.
 
 ## LICENSE AND COPYRIGHT
 
-Copyright (C) 2019 Frank Reinecke (frank.reinecke@qiagen.com)
+Copyright (C) 2019 Frank Reinecke (mail@frank-reinecke.de)
 
-This program is released under the following license: AGPL3
+This program is released under the following license: AGPL3, see [LICENSE](/LICENSE).
