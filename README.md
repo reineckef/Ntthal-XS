@@ -20,7 +20,7 @@ To install this module, run the following commands:
 
 ## SYNOPSIS
 
-```{perl}
+```perl
 use Ntthal::XS;
 my $NT = Ntthal::XS->new();
 
@@ -62,22 +62,23 @@ my $hybrid = $NT->ntthal('CCCGAAAAGTGCCACCTG', 'CAGGTGGCATTTTTTCGGG');
 
 ## BENCHMARK
 
-Here, a comparison is shown for the traditional *ntthal* command line call, a newer version that 
-does not read all parameter files at every call (it uses pre-populated lists) named *ntthal_new* 
-and the *xs* version implemented here. Note: The underlying algorithm was not changed, only the 
+Here, a comparison is shown for the traditional **ntthal** command line call, a newer version that 
+does not read all parameter files at every call (it uses pre-populated lists) named **ntthal_new** 
+and the **xs** version implemented here. *Note:* The underlying algorithm was __not changed__, only the 
 overhead calling it from Perl was reduced.
 
-> Benchmark: running ntthal, ntthal_new, xs for at least 3 CPU seconds...
->
->     ntthal: 23 wallclock secs ( 0.46 usr  2.57 sys + 14.47 cusr  5.04 csys = 22.54 CPU) @ 106.70/s (n=2405)
-> ntthal_new: 18 wallclock secs ( 0.34 usr  2.84 sys +  8.99 cusr  2.31 csys = 14.48 CPU) @ 389.36/s (n=5638)
->         xs:  3 wallclock secs ( 3.13 usr +  0.00 sys =  3.13 CPU) @ 1490.42/s (n=4665)
+```
+Benchmark: running ntthal, ntthal_new, xs for at least 3 CPU seconds...
 
->             Rate     ntthal ntthal_new         xs
-> ntthal      107/s         --       -73%       -93%
-> ntthal_new  389/s       265%         --       -74%
-> xs         1490/s      1297%       283%         --
+     ntthal: 23 wallclock secs ( 0.46 usr  2.57 sys + 14.47 cusr  5.04 csys = 22.54 CPU) @ 106.70/s (n=2405)
+ ntthal_new: 18 wallclock secs ( 0.34 usr  2.84 sys +  8.99 cusr  2.31 csys = 14.48 CPU) @ 389.36/s (n=5638)
+         xs:  3 wallclock secs ( 3.13 usr +  0.00 sys =  3.13 CPU) @ 1490.42/s (n=4665)
 
+             Rate     ntthal ntthal_new         xs
+ ntthal      107/s         --       -73%       -93%
+ ntthal_new  389/s       265%         --       -74%
+ xs         1490/s      1297%       283%         --
+```
 
 ## LICENSE AND COPYRIGHT
 
