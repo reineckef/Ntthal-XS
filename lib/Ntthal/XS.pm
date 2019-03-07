@@ -1,4 +1,5 @@
 package Ntthal::XS;
+our $VERSION = '0.2.6';
 
 #>>>
 use Ntthal::XS::Inline C => 'DATA';
@@ -6,13 +7,15 @@ use Ntthal::XS::Inline C => 'DATA';
 use Mouse;
 use Method::Signatures;
 
+
+
 =head1 NAME
 
 Ntthal::XS - Perl bindings to ntthal C code
 
 =head1 VERSION
 
-Version 0.2.5
+Version 0.2.6
 
 =head1 SYNOPSIS
 
@@ -31,20 +34,24 @@ Version 0.2.5
     my $hybrid = $NT->ntthal('CCCGAAAAGTGCCACCTG', 'CAGGTGGCATTTTTTCGGG');
     
     # $hybrid = {
-    #    dG => -13335.3624649896,     # { 0}
-    #    dH => -132500,               # { 1}
-    #    dna_conc => 50,              # { 2}
-    #    dntp => 0.8,                 # { 3}
-    #    dS => -384.216145526392,     # { 4}
-    #    dv => 0.8,                   # { 5}
-    #    maxLoop => 8,                # { 6}
-    #    mv => 50,                    # { 7}
-    #    s1 => "CCCGAAAAGTGCCACCTG",  # { 8}
-    #    s2 => "CAGGTGGCATTTTTTCGGG", # { 9}
-    #    t => 42.0422986972263,       # {10}
-    #    temp => 37,                  # {11}
-    #    type => "END1",              # {12}
-    #  }
+    #   dG => -13335.3624649896,          # { 0}
+    #   dH => -132500,                    # { 1}
+    #   dna_conc => 50,                   # { 2}
+    #   dntp => 0.8,                      # { 3}
+    #   dS => -384.216145526392,          # { 4}
+    #   duplex0 => "        G-         ", # { 5}
+    #   duplex1 => "CCCGAAAA  TGCCACCTG", # { 6}
+    #   duplex2 => "GGGCTTTT  ACGGTGGAC", # { 7}
+    #   duplex3 => "        TT         ", # { 8}
+    #   dv => 0.8,                        # { 9}
+    #   maxLoop => 8,                     # {10}
+    #   mv => 50,                         # {11}
+    #   s1 => "CCCGAAAAGTGCCACCTG",       # {12}
+    #   s2 => "CAGGTGGCATTTTTTCGGG",      # {13}
+    #   t => 42.0422986972263,            # {14}
+    #   temp => 37,                       # {15}
+    #   type => "END1",                   # {16}
+    # }
     
     # compare to the ntthal command line output
     #
@@ -65,7 +72,7 @@ Version 0.2.5
 
 =back
 
-=head2 HYBRIDIZATION CONTITIONS
+=head2 HYBRIDIZATION CONDITIONS
 
 =over 3
 
@@ -98,7 +105,6 @@ Version 0.2.5
 
 =cut
 
-our $VERSION = '0.2.5';
 
 # type - alignment type, END1, END2, ANY and HAIRPIN, by default ANY (when duplex)
 has 'type' => (
@@ -169,7 +175,6 @@ has 'typemap' => (
   }
   }
 );
-
 # counter - used internally to count the number of calls
 has 'counter' => (
   is => 'rw',
@@ -249,7 +254,7 @@ method ntthal($seq1, $seq2 = undef) {
   my $result = \%{ $self->args('named') };
   $result->{s1} = $seq1;
   $result->{s2} = $seq2;
-  map { $result->{$_} = shift @values } qw<t dH dS dG>;
+  map { $result->{$_} = shift @values } qw<t dH dS dG duplex0 duplex1 duplex2 duplex3>;
   return $result;
 };
 
@@ -268,6 +273,8 @@ func revcomp($in) {
   $in =~ tr/ATGC/TACG/;
   return scalar reverse $in;
 };
+
+
 
 
 
@@ -429,6 +436,10 @@ typedef struct thal_results {
    double S;
    double H;
    double dG;
+   char duplex0[255];
+   char duplex1[255];
+   char duplex2[255];
+   char duplex3[255];
 } thal_results;
 
 
@@ -3393,9 +3404,14 @@ drawDimer(int* ps1, int* ps2, double temp, double H, double S, const thal_mode m
       }
       N = (N/2) -1;
       t = ((H) / (S + (N * saltCorrection) + RC)) - ABSOLUTE_ZERO;
+      S = S + (N * saltCorrection);
+      G = (H) - (t37 * S);
+      o->temp = (double) t;
+      o->H = (double) H;
+      o->S = (double) S;
+      o->dG = (double) G;
+      
       if((mode != THL_FAST) && (mode != THL_DEBUG_F)) {
-         G = (H) - (t37 * (S + (N * saltCorrection)));
-         S = S + (N * saltCorrection);
          o->temp = (double) t;
          /* maybe user does not need as precise as that */
          /* printf("Thermodynamical values:\t%d\tdS = %g\tdH = %g\tdG = %g\tt = %g\tN = %d, SaltC=%f, RC=%f\n",
@@ -3408,11 +3424,8 @@ drawDimer(int* ps1, int* ps2, double temp, double H, double S, const thal_mode m
                    (double) t, (double) G, (double) H, (double) S);
          }
       } else {
-         o->temp = (double) t;
-         o->H = (double) H;
-         o->S = (double) S + (N * saltCorrection);
-         o->dG = (double) (H) - (t37 * (S + (N * saltCorrection)));
-         return NULL;
+        /* do nothing, return later */
+        // return NULL;
       }
    }
 
@@ -3484,6 +3497,13 @@ drawDimer(int* ps1, int* ps2, double temp, double H, double S, const thal_mode m
            strcatc(duplex[2], ' ');
            strcatc(duplex[3], '-');
         }
+   }
+   if (mode == THL_FAST) {
+     strcpy(o->duplex0, duplex[0]);
+     strcpy(o->duplex1, duplex[1]);
+     strcpy(o->duplex2, duplex[2]);
+     strcpy(o->duplex3, duplex[3]);
+     return NULL;
    }
    if ((mode == THL_GENERAL) || (mode == THL_DEBUG)) {
      printf("SEQ\t");
@@ -3662,6 +3682,10 @@ drawHairpin(int* bp, double mh, double ms, const thal_mode mode, double temp, th
       t = (mh / (ms + (((N/2)-1) * saltCorrection))) - ABSOLUTE_ZERO;
       mg = mh - (temp * (ms + (((N/2)-1) * saltCorrection)));
       ms = ms + (((N/2)-1) * saltCorrection);
+      o->temp = (double) t;
+      o->H = (double) mh;
+      o->S = (double) ms;
+      o->dG = (double) mg;
 
       if((mode != THL_FAST) && (mode != THL_DEBUG_F)) {
          o->temp = (double) t;
@@ -3672,18 +3696,13 @@ drawHairpin(int* bp, double mh, double ms, const thal_mode mode, double temp, th
            sprintf(ret_para, "Tm: %.1f&deg;C  dG: %.0f cal/mol  dH: %.0f cal/mol  dS: %.0f cal/mol*K\\n",
                    (double) t, (double) mg, (double) mh, (double) ms);
          }
-      } else {
-         o->temp = (double) t;
-         o->H = (double) mh;
-         o->S = (double) ms;
-         o->dG = (double) mg;
-         return NULL;
       }
    }
    /* plain-text output */
-   char* asciiRow;
-   asciiRow = (char*) safe_malloc(len1, o);
-   for(i = 0; i < len1; ++i) asciiRow[i] = '0';
+   char asciiRow[len1+1];
+   
+   // asciiRow = (char*) safe_malloc(len1, o);
+   for(i = 0; i < len1; ++i) asciiRow[i] = '\0';
    for(i = 1; i < len1+1; ++i) {
       if(bp[i-1] == 0) {
          asciiRow[(i-1)] = '-';
@@ -3695,6 +3714,12 @@ drawHairpin(int* bp, double mh, double ms, const thal_mode mode, double temp, th
          }
       }
    }
+   if (mode == THL_FAST) {
+         strcpy(o->duplex0, asciiRow);
+         strcpy(o->duplex1, oligo1);
+         return NULL;
+   }
+   
    if ((mode == THL_GENERAL) || (mode == THL_DEBUG)) {
      printf("SEQ\t");
      for(i = 0; i < len1; ++i) printf("%c",asciiRow[i]);
@@ -4143,6 +4168,12 @@ void align(char* oligo1, char* oligo2, int type, double mv, double dv, int maxLo
   Inline_Stack_Push(sv_2mortal(newSVnv(o.H)));
   Inline_Stack_Push(sv_2mortal(newSVnv(o.S)));
   Inline_Stack_Push(sv_2mortal(newSVnv(o.dG)));
+
+  Inline_Stack_Push(sv_2mortal(newSVpv(o.duplex0, strlen(o.duplex0))));
+  Inline_Stack_Push(sv_2mortal(newSVpv(o.duplex1, strlen(o.duplex1))));
+  Inline_Stack_Push(sv_2mortal(newSVpv(o.duplex2, strlen(o.duplex2))));
+  Inline_Stack_Push(sv_2mortal(newSVpv(o.duplex3, strlen(o.duplex3))));
+
   Inline_Stack_Done;
   
   /*  return o.temp; */

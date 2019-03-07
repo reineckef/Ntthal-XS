@@ -36,31 +36,34 @@ use Ntthal::XS;
 my $NT = Ntthal::XS->new();
 
 # tm will accept only one sequence
-print $NT->tm('TAATACGACTCACTATAGGG'); # 44.5215658215416
+print $NT->tm('TAATACGACTCACTATAGGG');    # 44.5215658215416
 
 # change parameters
 $NT->type('END1');
 $NT->dv(0.8);
 
 # ntthal will use two sequences (different strands!)
-my $hybrid = $NT->ntthal('CCCGAAAAGTGCCACCTG', 'CAGGTGGCATTTTTTCGGG');
-
+my $hybrid = $NT->ntthal( 'CCCGAAAAGTGCCACCTG', 'CAGGTGGCATTTTTTCGGG' );
 # $hybrid = {
-#    dG => -13335.3624649896,     # { 0}
-#    dH => -132500,               # { 1}
-#    dna_conc => 50,              # { 2}
-#    dntp => 0.8,                 # { 3}
-#    dS => -384.216145526392,     # { 4}
-#    dv => 0.8,                   # { 5}
-#    maxLoop => 8,                # { 6}
-#    mv => 50,                    # { 7}
-#    s1 => "CCCGAAAAGTGCCACCTG",  # { 8}
-#    s2 => "CAGGTGGCATTTTTTCGGG", # { 9}
-#    t => 42.0422986972263,       # {10}
-#    temp => 37,                  # {11}
-#    type => "END1",              # {12}
-#  }
- 
+#   dG => -13335.3624649896,          # { 0}
+#   dH => -132500,                    # { 1}
+#   dna_conc => 50,                   # { 2}
+#   dntp => 0.8,                      # { 3}
+#   dS => -384.216145526392,          # { 4}
+#   duplex0 => "        G-         ", # { 5}
+#   duplex1 => "CCCGAAAA  TGCCACCTG", # { 6}
+#   duplex2 => "GGGCTTTT  ACGGTGGAC", # { 7}
+#   duplex3 => "        TT         ", # { 8}
+#   dv => 0.8,                        # { 9}
+#   maxLoop => 8,                     # {10}
+#   mv => 50,                         # {11}
+#   s1 => "CCCGAAAAGTGCCACCTG",       # {12}
+#   s2 => "CAGGTGGCATTTTTTCGGG",      # {13}
+#   t => 42.0422986972263,            # {14}
+#   temp => 37,                       # {15}
+#   type => "END1",                   # {16}
+# }
+
 # compare to the ntthal command line output
 #
 #  ntthal -a END1 -dv 0.8 -s1 CCCGAAAAGTGCCACCTG -s2 CAGGTGGCATTTTTTCGGG

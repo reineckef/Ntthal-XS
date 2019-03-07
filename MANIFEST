@@ -1,9 +1,7 @@
 MANIFEST
+README.md
 Makefile.PL
-MYMETA.yml
 bin/ntthal_xs.pl
 lib/Ntthal/XS.pm
 lib/Ntthal/XS/Inline.pm
-MYMETA.json
-README
 t/test.t
