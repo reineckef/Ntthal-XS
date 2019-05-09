@@ -1,5 +1,5 @@
 package Ntthal::XS;
-our $VERSION = '0.2.6';
+our $VERSION = '0.2.7';
 
 #>>>
 use Ntthal::XS::Inline C => 'DATA';
@@ -15,7 +15,7 @@ Ntthal::XS - Perl bindings to ntthal C code
 
 =head1 VERSION
 
-Version 0.2.6
+Version 0.2.7
 
 =head1 SYNOPSIS
 
@@ -237,8 +237,12 @@ method ntthal($seq1, $seq2 = undef) {
     return { error => 'short input' };
   }
   if (not defined $seq2) {
-    $args[3] = 0; # we know there will be no gaps in the best alignment
-    $seq2 = revcomp($seq1);
+    if ($self->type ne 'HAIRPIN') {
+      $args[3] = 0; # we know there will be no gaps in the best alignment
+      $seq2 = revcomp($seq1);
+    } else {
+      $seq2 = $seq1;
+    }
   }
   else {
     $seq2 = cleanseq($seq2);
@@ -1244,7 +1248,7 @@ thal(const unsigned char *oligo_f,
             G1 = (EnthalpyDPT(i, j)+ SH[1] + dplx_init_H) - TEMP_KELVIN*(EntropyDPT(i, j) + SH[0] + dplx_init_S);
                 if(G1<bestG){
                    bestG = G1;
-                         bestJ = j;
+                   bestJ = j;
             }
          }
       }
@@ -3702,7 +3706,7 @@ drawHairpin(int* bp, double mh, double ms, const thal_mode mode, double temp, th
    char asciiRow[len1+1];
    
    // asciiRow = (char*) safe_malloc(len1, o);
-   for(i = 0; i < len1; ++i) asciiRow[i] = '\0';
+   for(i = 0; i <= len1; ++i) asciiRow[i] = '\0';
    for(i = 1; i < len1+1; ++i) {
       if(bp[i-1] == 0) {
          asciiRow[(i-1)] = '-';
@@ -3717,6 +3721,9 @@ drawHairpin(int* bp, double mh, double ms, const thal_mode mode, double temp, th
    if (mode == THL_FAST) {
          strcpy(o->duplex0, asciiRow);
          strcpy(o->duplex1, oligo1);
+         strcpy(o->duplex2, "");
+         strcpy(o->duplex3, "");
+         // fputs("return from drawHairpin\n",stderr);
          return NULL;
    }
    

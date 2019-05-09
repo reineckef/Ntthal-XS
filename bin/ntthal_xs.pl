@@ -19,7 +19,9 @@ for my $mode ('ANY', 'END1', 'END2', 'HAIRPIN') {
   dd $result;
   
   $cmd = sprintf "%s -s1 %s -s2 %s\n", $Ntthal->args('command'), $result->{s1}, $result->{s2};
-  
+  if ($mode eq 'HAIRPIN') {
+    $cmd = sprintf "%s -s1 %s\n", $Ntthal->args('command'), $result->{s1};
+  }
   print "\n$exe $cmd\n";
   if (-x $exe) {
     print `$exe $cmd`, "\n";
