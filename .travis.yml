@@ -1,5 +1,7 @@
 language: perl
 perl:
   - "5.22"
+before_install:
+  - "cpanm Inline::Module"
 install: "perl Makefile.PL && make"
 script: "make test"
